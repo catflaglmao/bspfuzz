@@ -13,8 +13,8 @@ Python 3, standard library only:
 
     python tools/make_maps.py [out dir]      # default: maps
 
-It writes the 18 maps and checks each one against the SHA-256 below. They should be the same files as
-`maps.zip` attached to the PRs.
+It writes the 19 maps and checks each one against the SHA-256 below. The first 18 are the same files as
+`maps.zip` attached to the PRs; `visofs_far_big_bsp2` was added later for #19.
 
 ## Tools
 
@@ -23,7 +23,7 @@ It writes the 18 maps and checks each one against the SHA-256 below. They should
 | `tools/bsplib.py` | Reads and writes the BSP header and lumps for v29, HL BSP30, BSP2 and 2PSB. |
 | `tools/bspgen.py` | Builds the base map: a box room split into `cells` empty leafs along x, plus `subs` door-like submodels. Hull 0 is a node tree, hulls 1 and 2 are clipnode boxes for the player sizes, the PVS lets each cell see its neighbours. `python tools/bspgen.py <dir>` writes one valid base map per format. |
 | `tools/bspmut.py` | Structure-aware mutations of the base map: 293 regression cases, each a known defect or boundary, with the loader outcome expected after the fix. `python tools/bspmut.py cases <dir>` writes them all plus `expected.tsv`. Its `check` and `table` commands run a loader test harness that is not part of this trimmed repo. |
-| `tools/make_maps.py` | Writes exactly the 18 maps below and checks their SHA-256. |
+| `tools/make_maps.py` | Writes exactly the 19 maps below and checks their SHA-256. |
 | `tools/bspinfo.py` | Prints a map's header, lumps and counts, for checking what a map contains. |
 
 ## The maps
@@ -52,7 +52,7 @@ regression cases (the function name says which family); the others are in `make_
 | 16 | `visleafs40000_bsp2.bsp` | `Map.room("bsp2", cells=40000, subs=0, vis="all")`: a valid map with 5000-byte vis rows. | ezQuake's 4095-byte vis buffers overflow. | `4ed0b8acc3a992887dcaaa8d223e158c9c32a95ca169f6a02c294308eb1eaf33` |
 | 17 | `vis_run_long_v29.bsp` | bspmut `fam_vis`: a 255-byte zero run in a 1-byte vis row. | `DecompressVis` writes 255 bytes into a row-sized buffer (mvdsv). | `96a198d4de2523de7e926aab840dd3aab72fc2af2dfd1a594d53e74127ced122` |
 | 18 | `bspx_numlumps_8000001.bsp` | bspmut `fam_bspx`: a BSPX directory with lump count 0x08000001. | `32 * count` wraps to 32; `CM_BSPX_LoadLumps` walks past the buffer. | `763aa5c6acd64bc8a1e1c39fac47286f31d45eae15aa54e00ff4393f32403b47` |
-| 19 | (none) | `map dm4`, then `map visleafs185364_novis_v29`, in ezQuake. | A map rejected late in loading after another map was loaded: the client walks the freed brush models of the previous map. | — |
+| 19 | `visofs_far_big_bsp2.bsp` | `Map.room("bsp2", cells=40000, subs=0, vis="all")` (4 MB); leaf 1's vis offset set to `FAR`. In ezQuake: `map dm4`, then `map visofs_far_big_bsp2`. | The map is loaded, then rejected; its 4 MB overwrite the previous map's freed brush models, which the client then walks while disconnecting. | `11b80eb09a83469764d48e0a719b175714cb82608055c8219c8ab4026a44f8a0` |
 
 ## License
 

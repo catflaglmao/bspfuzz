@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-or-later
-"""Write the 18 malformed maps of the BSP loading fixes and check their SHA-256.
+"""Write the 19 malformed maps of the BSP loading fixes and check their SHA-256.
 
     python tools/make_maps.py [out dir]      (default: maps)
 
 Every map is the synthetic base room of tools/bspgen.py with one thing changed.
-Nine come from the regression cases of tools/bspmut.py, the other nine are
+Nine come from the regression cases of tools/bspmut.py, the other ten are
 built here. The output is byte-identical on every run.
 """
 import hashlib
@@ -41,6 +41,7 @@ SHA256 = {
 	"visleafs185364_novis_v29": "29941b90e6b8daa7552c46ef8f7768a1bc2118ca4c7520323c1f13ad4e031e58",
 	"visleafs40000_bsp2": "4ed0b8acc3a992887dcaaa8d223e158c9c32a95ca169f6a02c294308eb1eaf33",
 	"visofs_far_v29": "fa9a8bbc8a4e6fd34dda5e95590776748a946783df61687649c1fe4199be39d5",
+	"visofs_far_big_bsp2": "11b80eb09a83469764d48e0a719b175714cb82608055c8219c8ab4026a44f8a0",
 	"zero_leafs_v29": "85bf1055bc726db5d691577a191607e73008fea4e1f18f3a815942459236d543",
 	"zero_nodes_v29": "9f45c006e4bf2905850cd08249b86b0587a953ec4c7419ac5ec3632f7033d075",
 }
@@ -86,6 +87,10 @@ def built_maps():
 
 	m = Map.room("bsp2", cells=40000, subs=0, vis="all")  # 5000-byte vis rows, 4095-byte buffers
 	yield "visleafs40000_bsp2", m
+
+	m = Map.room("bsp2", cells=40000, subs=0, vis="all")  # #19: 4 MB loaded, then leaf 1's vis offset
+	m.leafs[1][1] = FAR                                  # is rejected; overwrites the previous map's
+	yield "visofs_far_big_bsp2", m                       # freed brush models first
 
 	m = Map.room("bsp2")                                 # 100000 nodes deep through children[0],
 	p = m.plane(0, -4096)                                # the recursive (non-tail) call of CM_SetParent;
